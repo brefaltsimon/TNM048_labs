@@ -17,7 +17,7 @@ function worldMap(data) {
      * Task 15 - Get the tileLayer from the link at the bottom of this file
      * and add it to the map created above.
     */
-     L.tileLayer(map_link(), {
+        L.tileLayer(map_link(), {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
         id: 'mapbox/dank',
@@ -34,15 +34,17 @@ function worldMap(data) {
      */
     var svg_map = d3.select(leaflet_map.getPanes().overlayPane).append("svg");
     var g = svg_map.append("g").attr("class", "leaflet-zoom-hide");
-    
+
 
 
     /**
      * Task 17 - Create a function that projects lat/lng points on the map.
      * Use latLngToLayerPoint, remember which goes where.
      */
+
     function projectPointsOnMap(x,y) {
-        var points = leaflet_map.latLngToLayerPoint
+        var points = leaflet_map.latLngToLayerPoint(new L.LatLng(y, x));
+        this.stream.point(points.x, points.y);
     }
 
     
@@ -54,7 +56,9 @@ function worldMap(data) {
      * Create another variable names d3geoPath to project this transformation to it.
      */
     //Transforming to the specific projection
-
+    var transform = d3.geoTransform({point: projectPointsOnMap});
+    var d3path = d3.geoPath().projection(transform);
+    
     // similar to projectPoint this function converts lat/long to
     //svg coordinates except that it accepts a point from our
     //GeoJSON
@@ -74,21 +78,24 @@ function worldMap(data) {
      * Also add a class called mapcircle and set opacity to 0.4
      */
     //features for the points
+    var feature = g.selectAll("circle").data(data.features).enter().append("circle").attr("class", "mapcircle").style("opacity", .7);
 
     /**
      * Task 20 - Call the plot function with feature variable
      * not integers needed.
      */
-
+    var oints = new Points();
+    oints.plot(feature, 2, 2);
     //Redraw the dots each time we interact with the map
     //Remove comment tags when done with task 20
-    //leaflet_map.on("moveend", reset);
-    //reset();
+
+    leaflet_map.on("moveend", reset);
+    reset();
 
     //Mouseover
     //Remove comment tags when done with task 20
-    //mouseOver(feature);
-    //mouseOut(feature);
+    mouseOver(feature);
+    mouseOut(feature);
 
     //Mouse over function
     function mouseOver(feature) {

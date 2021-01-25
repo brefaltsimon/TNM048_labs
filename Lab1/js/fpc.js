@@ -54,19 +54,19 @@ function focusPlusContext(data) {
     var xScale = d3.scaleTime().range([0, width]);
     var yScale = d3.scaleLinear().range([height, 0]);
     var xAxis = d3.axisBottom(xScale);
-    var YAxis = d3.axisLeft(yScale);
+    var yAxis = d3.axisLeft(yScale);
     /**
      * Task 3 - Define scales and axes for context (Navigation through the data)
      */
     var navXScale = d3.scaleTime().range([0,width]);
-    var navYScale = d3.scaleLinear().range([0,height2]);
+    var navYScale = d3.scaleLinear().range([height2,0]);
     var navXAxis = d3.axisBottom(navXScale);
 
     /**
      * Task 4 - Define the brush for the context graph (Navigation)
      */
     var brush = d3.brushX().extent([[0,0],[width,height2]]).on("start end",brushed);
-    
+    svg.append("g").attr("class","brush").call(d3.brush().on("start end", brushed));
 
     //Setting scale parameters
     var maxDate = d3.max(data.features, function (d) { return parseDate(d.properties.Date) });
@@ -141,9 +141,9 @@ function focusPlusContext(data) {
     /**
      * Task 10 - Call x and y axis
      */
-    focus.append("g").attr("class", "axis axis-x").attr("transform", "translate(0," + height + ")").call(xAxis);
+    focus.append("g").attr("class", "axis axis--x").attr("transform", "translate(0," + height + ")").call(xAxis);
     //here..
-    focus.append("g").attr("class", "axis axis-y").call(YAxis);
+    focus.append("g").attr("class", "axis axis--y").call(yAxis);
     //here..
 
     //Add y axis label to the scatter plot
@@ -162,10 +162,12 @@ function focusPlusContext(data) {
 
     /**
      * Task 11 - Plot the dots on the focus graph.
+     * g.selectAll("circle").data(data.features).enter().append("circle").attr("class", "mapcircle").style("opacity", .7);
      */
-    selected_dots = dots.selectAll("dot").append('class', 'dot')
+        selected_dots = dots.selectAll("dot")
         .data(data.features)
         .enter().append("circle")
+        .attr('class', 'dot')
         .style("opacity", 0.7)
         .filter(function (d) { return d.properties.EQ_PRIMARY != null })
         .attr("cx", function (d) {
@@ -180,7 +182,7 @@ function focusPlusContext(data) {
      * plot(points,nr,nr) no need to send any integers!
      */
     var selpoints = new Points();
-    selpoints.plot(selected_dots,2,2);
+    selpoints.plot(selected_dots,4,2);
     //<---------------------------------------------------------------------------------------------------->
 
     //Mouseover function
@@ -208,7 +210,7 @@ function focusPlusContext(data) {
                     .attr('r', 15)
 
                 //Call map hover function if implemented!
-                //world_map.hovered(d.id);
+                world_map.hovered(d.id);
             });
     }
 
@@ -254,7 +256,6 @@ function focusPlusContext(data) {
      * var dots = focus.append("g");
      */
     context.append("g").attr("class", "brush").call(brush).call(brush.move, xScale.range());
-    //xScale.range().call(brush.move);
 
     //here..
     
