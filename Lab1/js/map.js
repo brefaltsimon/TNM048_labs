@@ -85,7 +85,7 @@ function worldMap(data) {
      * not integers needed.
      */
     var oints = new Points();
-    oints.plot(feature, 2, 2);
+    oints.plot(feature, 1, 1);
     //Redraw the dots each time we interact with the map
     //Remove comment tags when done with task 20
 

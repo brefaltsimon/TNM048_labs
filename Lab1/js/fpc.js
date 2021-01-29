@@ -127,7 +127,7 @@ function focusPlusContext(data) {
      */
     //plot(small_points, 0, 100);
     var points = new Points();
-    points.plot(small_points,2,2);
+    points.plot(small_points,1,1);
     //<---------------------------------------------------------------------------------------------------->
 
     /**
@@ -182,7 +182,7 @@ function focusPlusContext(data) {
      * plot(points,nr,nr) no need to send any integers!
      */
     var selpoints = new Points();
-    selpoints.plot(selected_dots,4,2);
+    selpoints.plot(selected_dots,1,1);
     //<---------------------------------------------------------------------------------------------------->
 
     //Mouseover function
