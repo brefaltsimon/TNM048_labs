@@ -14,30 +14,36 @@ function kmeans(data, k) {
     var oldqualitycheck = 0;
     var qualitycheck = 0;
     var converge = false;
+    var threshold = 0.01;
 
     //Parse the data from strings to floats
+
     var new_array = parseData(data);
 
-    //Task 4.1 - Select random k centroids
+    // //Task 4.1 - Select random k centroids
     var centroid = initCentroids(new_array, k);
 
-    //Prepare the array for different cluster indices
+    // //Prepare the array for different cluster indices
     var clusterIndexPerPoint = new Array(new_array.length).fill(0);
 
-    //Task 4.2 - Assign each point to the closest mean.
+    // //Task 4.2 - Assign each point to the closest mean.
     clusterIndexPerPoint = assignPointsToMeans(new_array, centroid);
 
     //Master loop -- Loop until quality is good
     do {
+
         //Task 4.3 - Compute mean of each cluster
         centroid = computeClusterMeans(new_array, clusterIndexPerPoint, k);
+
         // assign each point to the closest mean.
         var clusterIndexPerPoint = assignPointsToMeans(new_array, centroid);
 
         //Task 4.4 - Do a quality check for current result
         qualitycheck = qualityCheck(centroid, new_array, clusterIndexPerPoint);
 
-        //End the loop if...
+        //End the loop if...   
+        if(qualitycheck <= threshold) 
+            converge = true;
 
     }
     while (converge == false)
@@ -45,7 +51,7 @@ function kmeans(data, k) {
     return {
         assignments: clusterIndexPerPoint
     };
-
+    return data;
 }
 
 /**
@@ -58,19 +64,19 @@ function kmeans(data, k) {
  */
 function parseData(data) {
     var array = [];
-   
+
     for (i = 0; i < data.length; ++i) {
         var arrayyy = [];
-        var element = data[i];
-        var j = 0;
-        for(const [key, val] of Object.entries(element))
-        {
-            arrayyy[j] = parseFloat(val);
-            ++j;
+        var object = data[i];
+
+        for (const [key, val] of Object.entries(object)) {
+            arrayyy.push(parseFloat(val));
         }
+
         array[i] = arrayyy;
+
     }
-    
+
     return array;
 }
 
@@ -88,7 +94,6 @@ function initCentroids(data, k) {
         centroid[i] = data[position];
     }
 
-
     return centroid;
 }
 
@@ -101,10 +106,10 @@ function initCentroids(data, k) {
 * @return {Array}
 */
 function assignPointsToMeans(points, means) {
-
     var assignments = [];
+
     for (i = 0; i < points.length; ++i) {
-        assignments[i] = findClosestMeanIndex(points[i], means)
+        assignments.push(findClosestMeanIndex(points[i], means));
     }
 
     return assignments;
@@ -119,10 +124,11 @@ function assignPointsToMeans(points, means) {
 */
 function findClosestMeanIndex(point, means) {
 
-    var distances = [means.length];
+    var distances = [];
     for (j = 0; j < means.length; ++j) {
-        distances[j] = euclideanDistance(point, means[j]);
+        distances.push(euclideanDistance(point, means[j]));
     }
+
     return findIndexOfMinimum(distances);
 };
 /**
@@ -133,11 +139,27 @@ function findClosestMeanIndex(point, means) {
  */
 
 function euclideanDistance(point1, point2) {
+    var sum = 0;
+    
+    if (point1.length != point2.length){
+            throw ("point1 and point2 must be of same dimension");
+    } 
+         
+/*     for (i = 0; i < point1.length; ++i) {
+        sum = sum + Math.pow(point1[i] - point2[i], 2);
+    }
 
-    if (point1.length != point2.length)
-        throw ("point1 and point2 must be of same dimension");
-    else
-        Math.pow(point1 - point2, 2)
+    sum = Math.sqrt(sum); */
+    
+    sum = sum + Math.sqrt(Math.pow(point1[0] - point2[0], 2));
+    sum = sum + Math.sqrt(Math.pow(point1[1] - point2[1], 2));
+    sum = sum + Math.sqrt(Math.pow(point1[2] - point2[2], 2));
+
+    if (point1.length && point2.length == 5) {
+        sum = sum + Math.sqrt(Math.pow(point1[3] - point2[3], 2));
+        sum = sum + Math.sqrt(Math.pow(point1[4] - point2[4], 2));
+    }
+
     return sum;
 
 };
@@ -150,11 +172,11 @@ function euclideanDistance(point1, point2) {
  */
 function findIndexOfMinimum(array) {
     /* index = Math.min(... array); */
-    var index = 0;
 
-    array.sort(function (a, b) { return a - b })
-    index = array[0];
-    return index;
+    var idx = array.indexOf(Math.min.apply(null,array));
+
+    //console.log(index[1]); crash
+    return idx;
 };
 
 /**
@@ -169,24 +191,25 @@ function findIndexOfMinimum(array) {
  */
 function computeClusterMeans(points, assignments, k) {
 
-    if (points.length != assignments.length){
+    if (points.length != assignments.length) {
         throw ("points and assignments arrays must be of same dimension");
     }
     var newMeans = [];
     // for each cluster
-    for (j = 0; j < k; ++j) 
-    {
+    for (j = 0; j < k; ++j) {
         var array = [];
+        ;
         var l = 0;
-        for (i = 0; i < points.length; ++i) 
-        {
-            if (assignments[i] = j){
+        for (i = 0; i < assignments.length; ++i) {
+            if (assignments[i] == j) {
                 array[l] = points[i]
                 ++l;
             }
         }
         newMeans[j] = averagePosition(array);
+        
     }
+    
     return newMeans;
 };
 
@@ -199,15 +222,18 @@ function computeClusterMeans(points, assignments, k) {
  * @param {*} clusterIndexPerPoint
  */
 function qualityCheck(centroid, new_array, clusterIndexPerPoint) {
-    
-    
-    for(i = 0 ; i < centroid.length ; ++i){
-        
-        if(clusterIndexPerPoint == i)
-        {
 
+    var qualitycheck = 0;
+
+     for (i = 0; i < centroid.length; ++i) {
+
+        if (clusterIndexPerPoint == i) {
+            for(j = 0 ; j < new_array.lenght; ++j){
+
+                qualityCheck = Math.abs(Math.pow(centroid[j] - centroid[i], 2));
+            }
         }
-    }
+    } 
     return qualitycheck;
 }
 
@@ -216,12 +242,12 @@ function qualityCheck(centroid, new_array, clusterIndexPerPoint) {
  * @param {*} points
  * @return {number}
  */
-function averagePosition(points) {
-
+function averagePosition(points){
+    
     var sums = points[0];
-    for (var i = 1; i < points.length; i++) {
+    for (var i = 1; i < points.length; i++){
         var point = points[i];
-        for (var j = 0; j < point.length; j++) {
+        for (var j = 0; j < point.length; j++){
             sums[j] += point[j];
         }
     }
@@ -231,3 +257,4 @@ function averagePosition(points) {
 
     return sums;
 };
+ 
